@@ -21,6 +21,8 @@
     </ItemGroup>
     <RemoveDir Directories="$(StageDir)" />
     <Copy SourceFiles="@(InstalledFile)" DestinationFiles="@(InstalledFile->'$(StageDir)\$(ModFolderName)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <!-- Folders that must ship even when empty (an Owlcat mod needs Bundles, or its blueprints never load). -->
+    <MakeDir Directories="@(PackageDirectory->'$(StageDir)\$(ModFolderName)\%(Identity)')" />
     <MakeDir Directories="$(DistDir)" />
     <ZipDirectory SourceDirectory="$(StageDir)" DestinationFile="$(DistDir)\$(ModFolderName)-$(ModVersion).zip" Overwrite="true" />
     <Message Importance="high" Text="Packaged $([System.IO.Path]::GetFullPath('$(DistDir)\$(ModFolderName)-$(ModVersion).zip'))" />
