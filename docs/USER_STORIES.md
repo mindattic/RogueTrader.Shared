@@ -22,4 +22,4 @@ _Nothing recorded yet._
 | ID | Date | Type | Status | Summary | Ref |
 |---|---|---|---|---|---|
 | RTS-T1 | 2026-10-26 | docs | closed | Start the permanent ticket log in the ticket database | — |
-| RTS-T2 | 2026-10-26 | feature | open | Create RogueTrader.Shared: source-shared build setup and helpers for Rogue Trader mods (Brevity, Overwatch, future ones) | — |
+| RTS-T2 | 2026-10-26 | feature | closed | Create RogueTrader.Shared: source-shared build setup and helpers for Rogue Trader mods (Brevity, Overwatch, future ones) | 311f523 |
