@@ -1,0 +1,9 @@
+<Project>
+  <!-- Where the game and its save folder are. Override any of these with -p:Name=value. -->
+  <PropertyGroup>
+    <GameDir Condition="'$(GameDir)' == ''">D:\Games\Steam\steamapps\common\Warhammer 40,000 Rogue Trader</GameDir>
+    <Managed>$(GameDir)\WH40KRT_Data\Managed</Managed>
+    <GameDataDir Condition="'$(GameDataDir)' == ''">$(USERPROFILE)\AppData\LocalLow\Owlcat Games\Warhammer 40000 Rogue Trader</GameDataDir>
+    <ModTemplateTar>$(GameDir)\Modding\WhRtModificationTemplate.tar</ModTemplateTar>
+  </PropertyGroup>
+</Project>

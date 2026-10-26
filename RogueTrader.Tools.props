@@ -1,0 +1,7 @@
+<Project>
+  <!-- Import from a command-line tool (net8+) that reads the game's data: game paths plus the shared tool sources. -->
+  <Import Project="$(MSBuildThisFileDirectory)RogueTrader.Game.props" />
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)src\Tools\*.cs" Link="Shared\%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

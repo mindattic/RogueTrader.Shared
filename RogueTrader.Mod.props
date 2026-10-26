@@ -1,0 +1,19 @@
+<Project>
+  <!-- Import from a mod's csproj (net48). References the game's assemblies and compiles the shared runtime helpers
+       into the mod itself, so two mods never load two versions of one shared DLL into the game. -->
+  <Import Project="$(MSBuildThisFileDirectory)RogueTrader.Game.props" />
+
+  <PropertyGroup>
+    <TargetFramework Condition="'$(TargetFramework)' == ''">net48</TargetFramework>
+    <LangVersion Condition="'$(LangVersion)' == ''">latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Every game assembly except the framework ones, which net48 already provides. -->
+  <ItemGroup>
+    <GameAssembly Include="$(Managed)\*.dll" Exclude="$(Managed)\mscorlib.dll;$(Managed)\netstandard.dll;$(Managed)\System*.dll;$(Managed)\Mono.*.dll;$(Managed)\Microsoft.*.dll" />
+    <Reference Include="@(GameAssembly)" Private="false" />
+    <Compile Include="$(MSBuildThisFileDirectory)src\Runtime\*.cs" Link="Shared\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)RogueTrader.Package.targets" />
+</Project>

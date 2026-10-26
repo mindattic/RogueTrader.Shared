@@ -1,0 +1,28 @@
+<Project>
+  <!-- dotnet build -c Release zips the installed mod as dist\<ModFolderName>-<ModVersion>.zip holding one
+       <ModFolderName> folder, the layout Nexus and Vortex expect. The mod sets ModInstallDir, ModFolderName and
+       ModVersion, and runs its own install target before this one (PackageAfter, default InstallMod). -->
+  <PropertyGroup>
+    <PackageAfter Condition="'$(PackageAfter)' == ''">InstallMod</PackageAfter>
+    <DistDir Condition="'$(DistDir)' == ''">$(MSBuildProjectDirectory)\..\..\dist</DistDir>
+  </PropertyGroup>
+
+  <Target Name="PackageMod" AfterTargets="$(PackageAfter)" Condition="'$(Configuration)' == 'Release'">
+    <Error Condition="'$(ModInstallDir)' == '' or '$(ModFolderName)' == '' or '$(ModVersion)' == ''"
+           Text="Set ModInstallDir, ModFolderName and ModVersion before importing RogueTrader.Mod.props packaging." />
+    <PropertyGroup>
+      <StageDir>$(IntermediateOutputPath)package</StageDir>
+    </PropertyGroup>
+    <!-- A mod can list exactly what ships as PackageFile items (e.g. to leave out settings a mod manager writes
+         into the install folder); otherwise the whole install folder is packaged. -->
+    <ItemGroup>
+      <InstalledFile Include="$(ModInstallDir)\**\*" Condition="'@(PackageFile)' == ''" />
+      <InstalledFile Include="@(PackageFile)" />
+    </ItemGroup>
+    <RemoveDir Directories="$(StageDir)" />
+    <Copy SourceFiles="@(InstalledFile)" DestinationFiles="@(InstalledFile->'$(StageDir)\$(ModFolderName)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <MakeDir Directories="$(DistDir)" />
+    <ZipDirectory SourceDirectory="$(StageDir)" DestinationFile="$(DistDir)\$(ModFolderName)-$(ModVersion).zip" Overwrite="true" />
+    <Message Importance="high" Text="Packaged $([System.IO.Path]::GetFullPath('$(DistDir)\$(ModFolderName)-$(ModVersion).zip'))" />
+  </Target>
+</Project>
