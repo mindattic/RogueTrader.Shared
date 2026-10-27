@@ -17,5 +17,13 @@
            Text="$(ModInstallDir) has no OwlcatModificationSettings.json." />
     <Error Condition="Exists('$(OwlcatSettingsFile)') and (!$(OwlcatSettingsText.Contains('&quot;m_Bundles&quot;')) or !$(OwlcatSettingsText.Contains('&quot;m_List&quot;')))"
            Text="OwlcatModificationSettings.json must include &quot;BundlesLayout&quot;: { &quot;m_Guids&quot;: [], &quot;m_Bundles&quot;: [] } and &quot;BundleDependencies&quot;: { &quot;m_List&quot;: [] }. Without them the game hangs on its first loading screen (NullReferenceException in OwlcatModification.TryLoadBundleAsync)." />
+    <!-- 3. Component patches (*.jbp_patch) are read with a strict enum converter: a number where an enum belongs, such as
+         "m_Flags": 0, stops the game when the patched blueprint first loads (usually loading a save). Write "m_Flags": "0". -->
+    <ItemGroup>
+      <OwlcatPatchFile Include="$(ModInstallDir)\Blueprints\**\*.jbp_patch" />
+      <OwlcatBadPatch Include="@(OwlcatPatchFile)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($([System.IO.File]::ReadAllText('%(FullPath)')), 'm_Flags\W{1,4}\d'))" />
+    </ItemGroup>
+    <Error Condition="'@(OwlcatBadPatch)' != ''"
+           Text="%(OwlcatBadPatch.Filename)%(OwlcatBadPatch.Extension) writes m_Flags as a number. Component patches are read with a strict enum converter, so this stops the game when the blueprint loads: write &quot;m_Flags&quot;: &quot;0&quot;." />
   </Target>
 </Project>

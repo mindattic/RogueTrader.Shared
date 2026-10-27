@@ -48,12 +48,12 @@ Tool helpers (`src/Tools`):
 
 Keep a helper here only once a second mod needs it, or it's clearly game plumbing every mod will need.
 
-## Owlcat-format mods: two mistakes that stop the game
+## Owlcat-format mods: three mistakes that stop the game
 
 Rogue Trader loads mods two ways. Unity Mod Manager mods (like RogueTrader.Brevity) live in
 `UnityModManager\<Id>` with an `Info.json`. Owlcat's own format (like RogueTrader.Overwatch) lives
 in `Modifications\<Name>` with `OwlcatModificationManifest.json` and `OwlcatModificationSettings.json`.
-An Owlcat-format mod must have both of these, and neither fails until the game runs:
+An Owlcat-format mod must get all three right, and none of them fails until the game runs:
 
 1. **A `Bundles` folder, even when empty.** The loader lists it without checking that it exists. The
    exception skips loading every blueprint in the mod, so no ability or item from it appears.
@@ -67,6 +67,13 @@ An Owlcat-format mod must have both of these, and neither fails until the game r
    scene load then asks each mod for bundles, and the game hangs on its first loading screen
    (`NullReferenceException` in `OwlcatModification.TryLoadBundleAsync` in `Player.log`).
 
+3. **Enum values as strings in component patches.** A `*.jbp_patch` component (`ComponentsPatches`'
+   `FieldValue`) is read with a strict converter that only accepts enum values as text, unlike `.jbp`
+   files, which also accept numbers. A number such as `"m_Flags": 0` stops the game with "Cannot read
+   Integer as enum value" when the patched blueprint first loads, usually while loading a save. Write
+   `"m_Flags": "0"`, as Owlcat's own example patches do. Also use a real `Author` in `.jbp` files
+   (`"Unknown"`): it's an enum of Owlcat staff names, and anything else logs an exception per blueprint.
+
 Set `<OwlcatModification>true</OwlcatModification>` in the mod's csproj and
-`RogueTrader.OwlcatMod.targets` checks both after every install, failing the build with the fix
+`RogueTrader.OwlcatMod.targets` checks all three after every install, failing the build with the fix
 spelled out. The template's own build (Unity) produces these; a hand-built mod has to add them.
