@@ -24,3 +24,4 @@ _Nothing recorded yet._
 | RTS-T1 | 2026-10-26 | docs | closed | Start the permanent ticket log in the ticket database | — |
 | RTS-T2 | 2026-10-26 | feature | closed | Create RogueTrader.Shared: source-shared build setup and helpers for Rogue Trader mods (Brevity, Overwatch, future ones) | 311f523 |
 | RTS-T3 | 2026-10-26 | fix | closed | Release zips drop empty folders an Owlcat mod needs (Bundles), and mods built from a worktree can't find RogueTrader.Shared | bf259fb |
+| RTS-T4 | 2026-10-26 | fix | closed | Guard Owlcat-format mods against the two startup traps (missing Bundles folder, missing bundle sections in OwlcatModificationSettings.json): README note plus a build check | 0bdd788 |
