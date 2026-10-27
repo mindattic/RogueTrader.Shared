@@ -17,6 +17,7 @@ relative path, or set `-p:RogueTraderShared=<path>`.
 |---|---|---|
 | `RogueTrader.Game.props` | anything | `GameDir`, `Managed`, `GameDataDir`, `ModTemplateTar` (override with `-p:Name=value`) |
 | `RogueTrader.Mod.props` | a mod's csproj (net48) | the above, a reference to every game assembly except the framework ones, `src/Runtime/*.cs`, and release packaging |
+| `RogueTrader.OwlcatMod.targets` | (via Mod.props) | with `OwlcatModification=true`, fails the build if the installed mod lacks `Bundles` or the settings bundle sections (see below) |
 | `RogueTrader.Package.targets` | (via Mod.props) | `dotnet build -c Release` zips `$(ModInstallDir)` to `dist/$(ModFolderName)-$(ModVersion).zip`, after the mod's `InstallMod` target |
 | `RogueTrader.Tools.props` | a command-line tool (net8+) | game paths and `src/Tools/*.cs` |
 
@@ -46,3 +47,26 @@ Tool helpers (`src/Tools`):
 ```
 
 Keep a helper here only once a second mod needs it, or it's clearly game plumbing every mod will need.
+
+## Owlcat-format mods: two mistakes that stop the game
+
+Rogue Trader loads mods two ways. Unity Mod Manager mods (like RogueTrader.Brevity) live in
+`UnityModManager\<Id>` with an `Info.json`. Owlcat's own format (like RogueTrader.Overwatch) lives
+in `Modifications\<Name>` with `OwlcatModificationManifest.json` and `OwlcatModificationSettings.json`.
+An Owlcat-format mod must have both of these, and neither fails until the game runs:
+
+1. **A `Bundles` folder, even when empty.** The loader lists it without checking that it exists. The
+   exception skips loading every blueprint in the mod, so no ability or item from it appears.
+   Create it in the install target, and ship it with `<PackageDirectory Include="Bundles" />`.
+2. **The bundle sections in `OwlcatModificationSettings.json`, even when empty:**
+   ```json
+   "BundlesLayout": { "m_Guids": [], "m_Bundles": [] },
+   "BundleDependencies": { "m_List": [] },
+   ```
+   The loader reads the file with Unity's `JsonUtility`, which leaves missing sections null. Every
+   scene load then asks each mod for bundles, and the game hangs on its first loading screen
+   (`NullReferenceException` in `OwlcatModification.TryLoadBundleAsync` in `Player.log`).
+
+Set `<OwlcatModification>true</OwlcatModification>` in the mod's csproj and
+`RogueTrader.OwlcatMod.targets` checks both after every install, failing the build with the fix
+spelled out. The template's own build (Unity) produces these; a hand-built mod has to add them.

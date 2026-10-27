@@ -1,0 +1,21 @@
+<Project>
+  <!-- For mods in Owlcat's own format (loaded from the game's Modifications folder; set OwlcatModification=true).
+       Fails the build on the two mistakes that stop the game: both pass silently until the game is run.
+       1. No Bundles folder: OwlcatModification.LoadBundles lists it without checking it exists, throws, and every
+          blueprint in the mod is skipped.
+       2. OwlcatModificationSettings.json without BundlesLayout.m_Bundles: Unity's JsonUtility leaves the missing
+          section null, and the first scene load hangs on the loading screen (NullReferenceException in
+          OwlcatModification.TryLoadBundleAsync). -->
+  <Target Name="CheckOwlcatMod" AfterTargets="$(PackageAfter)" BeforeTargets="PackageMod" Condition="'$(OwlcatModification)' == 'true'">
+    <PropertyGroup>
+      <OwlcatSettingsFile>$(ModInstallDir)\OwlcatModificationSettings.json</OwlcatSettingsFile>
+      <OwlcatSettingsText Condition="Exists('$(OwlcatSettingsFile)')">$([System.IO.File]::ReadAllText('$(OwlcatSettingsFile)'))</OwlcatSettingsText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(ModInstallDir)\Bundles')"
+           Text="$(ModInstallDir) has no Bundles folder. The game's loader throws without it and skips every blueprint in the mod: create it in the install target (and ship it with PackageDirectory Include=&quot;Bundles&quot;)." />
+    <Error Condition="!Exists('$(OwlcatSettingsFile)')"
+           Text="$(ModInstallDir) has no OwlcatModificationSettings.json." />
+    <Error Condition="Exists('$(OwlcatSettingsFile)') and (!$(OwlcatSettingsText.Contains('&quot;m_Bundles&quot;')) or !$(OwlcatSettingsText.Contains('&quot;m_List&quot;')))"
+           Text="OwlcatModificationSettings.json must include &quot;BundlesLayout&quot;: { &quot;m_Guids&quot;: [], &quot;m_Bundles&quot;: [] } and &quot;BundleDependencies&quot;: { &quot;m_List&quot;: [] }. Without them the game hangs on its first loading screen (NullReferenceException in OwlcatModification.TryLoadBundleAsync)." />
+  </Target>
+</Project>

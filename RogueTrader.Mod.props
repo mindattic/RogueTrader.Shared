@@ -16,4 +16,5 @@
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)RogueTrader.Package.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)RogueTrader.OwlcatMod.targets" />
 </Project>
